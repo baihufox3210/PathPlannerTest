@@ -18,10 +18,6 @@ import frc.robot.Subsystems.Gyro.Gyro;
 
 public class Drivetrain extends SubsystemBase {
     public MecanumModule driveMotor[] = new MecanumModule[4];
-    
-    private final SlewRateLimiter xLimiter = new SlewRateLimiter(Constants.SpeedLimiter);
-    private final SlewRateLimiter yLimiter = new SlewRateLimiter(Constants.SpeedLimiter);
-    private final SlewRateLimiter zLimiter = new SlewRateLimiter(Constants.SpeedLimiter);
 
     Gyro gyro = Gyro.getInstance();
     
@@ -78,9 +74,9 @@ public class Drivetrain extends SubsystemBase {
 
     public void drive(double xSpeed, double ySpeed, double zRotation) {
         mecanumDrive.driveCartesian(
-            xLimiter.calculate(xSpeed),
-            yLimiter.calculate(ySpeed),
-            zLimiter.calculate(zRotation),
+            xSpeed,
+            ySpeed,
+            zRotation,
             gyro.getRotation()
         );
     }
@@ -97,21 +93,21 @@ public class Drivetrain extends SubsystemBase {
     public MecanumDriveWheelPositions getPosition() {
         return new MecanumDriveWheelPositions(
             driveMotor[0].getPosition(),
-            driveMotor[1].getPosition(),
             driveMotor[2].getPosition(),
+            driveMotor[1].getPosition(),
             driveMotor[3].getPosition()
         );
     }
 
     public ChassisSpeeds getChassisSpeeds() {
-        MecanumDriveWheelSpeeds wheelSpeeds = new MecanumDriveWheelSpeeds(
-            driveMotor[0].getVelocity(),
-            driveMotor[1].getVelocity(),
-            driveMotor[2].getVelocity(),
-            driveMotor[3].getVelocity()
+        return Constants.kinematics.toChassisSpeeds(
+            new MecanumDriveWheelSpeeds(
+                driveMotor[0].getVelocity(),
+                driveMotor[2].getVelocity(),
+                driveMotor[1].getVelocity(),
+                driveMotor[3].getVelocity()
+            )
         );
-
-        return Constants.kinematics.toChassisSpeeds(wheelSpeeds);
     }
 
     public void resetPose(Pose2d pose) {
@@ -125,5 +121,13 @@ public class Drivetrain extends SubsystemBase {
     public static Drivetrain getInstance() {
         if(drivetrain == null) drivetrain = new Drivetrain();
         return drivetrain;
+    }
+
+    @Override
+    public void periodic() {
+        PoseEstimator.update(
+            gyro.getRotation(),
+            getPosition()
+        );
     }
 }
