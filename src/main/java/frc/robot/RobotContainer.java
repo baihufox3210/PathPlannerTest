@@ -1,5 +1,8 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -27,6 +30,11 @@ public class RobotContainer {
   private void configureBindings() {}
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    try {
+      PathPlannerPath path = PathPlannerPath.fromPathFile("Example Path");
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      return Commands.print("Could not load path: " + e.getMessage());
+    }
   }
 }

@@ -6,7 +6,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -63,11 +62,7 @@ public class Drivetrain extends SubsystemBase {
                 new PIDConstants(5.0, 0.0, 0.0)
             ),
             config,
-            () -> {
-                var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) return alliance.get() == DriverStation.Alliance.Red;
-                return false;
-            },
+            () -> DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red,
             this
         );
     }
